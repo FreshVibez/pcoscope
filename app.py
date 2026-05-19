@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from src.explain import global_feature_importance, recommended_follow_up, risk_category, top_prediction_factors
-from src.qwen_assistant import generate_assistant_reply, generate_qwen_explanation, qwen_is_configured
+from src.qwen_assistant import generate_assistant_reply, generate_qwen_explanation, qwen_is_configured, qwen_provider_name
 from src.train import DATA_PATH, MODEL_PATH, train_best_model
 
 APP_DIR = Path(__file__).resolve().parent
@@ -1358,16 +1358,17 @@ def assistant_status_markup() -> str:
     """Return assistant connection status markup."""
 
     if qwen_is_configured():
+        provider = qwen_provider_name() or "Qwen"
         return (
             '<div class="assistant-status">'
-            '<strong>Live Qwen connected.</strong><br>'
-            'Responses are generated through DashScope with non-diagnostic safety instructions.'
+            f'<strong>Live Qwen connected through {html.escape(provider)}.</strong><br>'
+            'Responses are generated through the configured OpenAI-compatible API with non-diagnostic safety instructions.'
             '</div>'
         )
     return (
         '<div class="assistant-status">'
         '<strong>Live Qwen is not connected.</strong><br>'
-        'Fallback replies are active. Add DASHSCOPE_API_KEY to enable Qwen.'
+        'Fallback replies are active. Add OPENROUTER_API_KEY for OpenRouter or DASHSCOPE_API_KEY for DashScope.'
         '</div>'
     )
 

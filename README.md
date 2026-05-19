@@ -88,7 +88,7 @@ Qwen is optional and is used only after the ML model has computed the screening 
 - top contributing factors
 - recommended follow-up
 
-The prompts explicitly state that PCOScope is a risk-screening and clinical decision-support prototype, not a medical diagnosis tool. The assistant is instructed not to prescribe medication and to recommend clinician review for clinical decisions. API keys are never hardcoded. Set `DASHSCOPE_API_KEY` in your environment or in `.streamlit/secrets.toml` to enable Qwen; otherwise, the app uses local fallback explanations.
+The prompts explicitly state that PCOScope is a risk-screening and clinical decision-support prototype, not a medical diagnosis tool. The assistant is instructed not to prescribe medication and to recommend clinician review for clinical decisions. API keys are never hardcoded. Set `OPENROUTER_API_KEY` for the OpenRouter-hosted Qwen model, or `DASHSCOPE_API_KEY` if using DashScope directly. If neither key is configured, the app uses local fallback explanations.
 
 ## How to Run
 
@@ -104,17 +104,17 @@ streamlit run app.py
 Optional Qwen setup:
 
 ```bash
-export DASHSCOPE_API_KEY="your_key_here"
+export OPENROUTER_API_KEY="your_openrouter_key_here"
 streamlit run app.py
 ```
 
 Or create `.streamlit/secrets.toml`:
 
 ```toml
-DASHSCOPE_API_KEY = "your_key_here"
+OPENROUTER_API_KEY = "your_openrouter_key_here"
 ```
 
-The app shows a connection message inside the AI Assistant panel so you can confirm whether live Qwen or the fallback responder is being used.
+For DashScope instead, use `DASHSCOPE_API_KEY`. The app shows a connection message inside the AI Assistant panel so you can confirm whether live Qwen or the fallback responder is being used.
 
 ## Project Structure
 

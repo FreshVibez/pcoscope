@@ -1,32 +1,97 @@
-"""Optional Qwen/DashScope explanation layer for PCOScope."""
+"""Optional Qwen explanation layer for PCOScope.
+
+The app supports OpenRouter first because it is easy to deploy through
+Streamlit secrets, and keeps DashScope as a backward-compatible provider.
+"""
 
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-DEFAULT_MODEL = "qwen-plus"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+OPENROUTER_MODEL = "qwen/qwen3-next-80b-a3b-instruct"
+DASHSCOPE_MODEL = "qwen-plus"
+
+
+@dataclass(frozen=True)
+class QwenProvider:
+    """Runtime configuration for an OpenAI-compatible Qwen provider."""
+
+    name: str
+    api_key: str
+    base_url: str
+    model: str
+
+
+def _read_secret(name: str) -> str:
+    """Read a secret from the environment first, then Streamlit secrets."""
+
+    value = os.getenv(name, "").strip()
+    if value:
+        return value
+
+    try:
+        import streamlit as st
+
+        return str(st.secrets.get(name, "")).strip()
+    except Exception:
+        return ""
 
 
 def get_dashscope_api_key() -> str:
     """Read the DashScope key from environment variables or Streamlit secrets."""
 
-    api_key = os.getenv("DASHSCOPE_API_KEY", "").strip()
-    if api_key:
-        return api_key
+    return _read_secret("DASHSCOPE_API_KEY")
 
-    try:
-        import streamlit as st
 
-        return str(st.secrets.get("DASHSCOPE_API_KEY", "")).strip()
-    except Exception:
-        return ""
+def get_openrouter_api_key() -> str:
+    """Read the OpenRouter key from environment variables or Streamlit secrets."""
+
+    return _read_secret("OPENROUTER_API_KEY")
+
+
+def get_qwen_provider() -> QwenProvider | None:
+    """Return the configured Qwen provider.
+
+    OpenRouter is preferred when present because the hackathon deployment is
+    using an OpenRouter-hosted Qwen model. DashScope remains supported for the
+    original official Qwen-compatible setup.
+    """
+
+    openrouter_key = get_openrouter_api_key()
+    if openrouter_key:
+        return QwenProvider(
+            name="OpenRouter",
+            api_key=openrouter_key,
+            base_url=OPENROUTER_BASE_URL,
+            model=OPENROUTER_MODEL,
+        )
+
+    dashscope_key = get_dashscope_api_key()
+    if dashscope_key:
+        return QwenProvider(
+            name="DashScope",
+            api_key=dashscope_key,
+            base_url=DASHSCOPE_BASE_URL,
+            model=DASHSCOPE_MODEL,
+        )
+
+    return None
 
 
 def qwen_is_configured() -> bool:
     """Return whether live Qwen calls can be attempted."""
 
-    return bool(get_dashscope_api_key())
+    return get_qwen_provider() is not None
+
+
+def qwen_provider_name() -> str:
+    """Return a display name for the configured provider."""
+
+    provider = get_qwen_provider()
+    return provider.name if provider else ""
 
 
 def fallback_explanation(
@@ -51,12 +116,12 @@ def generate_qwen_explanation(
     risk_category: str,
     top_factors: list[str],
     follow_up: str,
-    model: str = DEFAULT_MODEL,
+    model: str | None = None,
 ) -> str:
     """Generate a short patient-friendly explanation through Qwen if configured."""
 
-    api_key = get_dashscope_api_key()
-    if not api_key:
+    provider = get_qwen_provider()
+    if provider is None:
         return fallback_explanation(risk_score, risk_category, top_factors, follow_up)
 
     prompt = (
@@ -71,9 +136,9 @@ def generate_qwen_explanation(
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key, base_url=BASE_URL)
+        client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
         response = client.chat.completions.create(
-            model=model,
+            model=model or provider.model,
             messages=[
                 {"role": "system", "content": "You explain clinical screening outputs safely and clearly."},
                 {"role": "user", "content": prompt},
@@ -137,12 +202,12 @@ def generate_assistant_reply(
     risk_category: str | None = None,
     top_factors: list[str] | None = None,
     follow_up: str | None = None,
-    model: str = DEFAULT_MODEL,
+    model: str | None = None,
 ) -> str:
     """Answer bounded PCOScope assistant questions through Qwen when configured."""
 
-    api_key = get_dashscope_api_key()
-    if not api_key:
+    provider = get_qwen_provider()
+    if provider is None:
         return fallback_assistant_reply(question, risk_score, risk_category, top_factors, follow_up)
 
     context = (
@@ -156,9 +221,9 @@ def generate_assistant_reply(
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key, base_url=BASE_URL)
+        client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
         response = client.chat.completions.create(
-            model=model,
+            model=model or provider.model,
             messages=[
                 {"role": "system", "content": context},
                 {"role": "user", "content": question},
