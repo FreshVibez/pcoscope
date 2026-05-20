@@ -88,7 +88,7 @@ Qwen is optional and is used only after the ML model has computed the screening 
 - top contributing factors
 - recommended follow-up
 
-The prompts explicitly state that PCOScope is a risk-screening and clinical decision-support prototype, not a medical diagnosis tool. The assistant is instructed not to prescribe medication and to recommend clinician review for clinical decisions. API keys are never hardcoded. Set `OPENROUTER_API_KEY` for the OpenRouter-hosted Qwen model, or `DASHSCOPE_API_KEY` if using DashScope directly. If neither key is configured, the app uses local fallback explanations.
+The prompts explicitly state that PCOScope is a risk-screening and clinical decision-support prototype, not a medical diagnosis tool. The assistant is instructed not to prescribe medication and to recommend clinician review for clinical decisions. API keys are never hardcoded. Set `OPENROUTER_API_KEY` for the OpenRouter-hosted Qwen free model, or `DASHSCOPE_API_KEY` if using DashScope directly. If neither key is configured, the app uses local fallback explanations.
 
 ## How to Run
 

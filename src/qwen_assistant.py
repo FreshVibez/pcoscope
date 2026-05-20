@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-OPENROUTER_MODEL = "qwen/qwen3-next-80b-a3b-instruct"
+OPENROUTER_MODEL = "qwen/qwen3-next-80b-a3b-instruct:free"
 DASHSCOPE_MODEL = "qwen-plus"
 
 
@@ -94,6 +94,24 @@ def qwen_provider_name() -> str:
     return provider.name if provider else ""
 
 
+def _qwen_client(provider: QwenProvider):
+    """Create an OpenAI-compatible client for the selected provider."""
+
+    from openai import OpenAI
+
+    if provider.name == "OpenRouter":
+        return OpenAI(
+            api_key=provider.api_key,
+            base_url=provider.base_url,
+            default_headers={
+                "HTTP-Referer": "https://pcoscope.streamlit.app",
+                "X-Title": "PCOScope",
+            },
+        )
+
+    return OpenAI(api_key=provider.api_key, base_url=provider.base_url)
+
+
 def fallback_explanation(
     risk_score: float,
     risk_category: str,
@@ -134,9 +152,7 @@ def generate_qwen_explanation(
     )
 
     try:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
+        client = _qwen_client(provider)
         response = client.chat.completions.create(
             model=model or provider.model,
             messages=[
@@ -147,7 +163,8 @@ def generate_qwen_explanation(
             max_tokens=220,
         )
         return response.choices[0].message.content.strip()
-    except Exception:
+    except Exception as exc:
+        print(f"Qwen explanation call failed through {provider.name}: {exc}")
         return fallback_explanation(risk_score, risk_category, top_factors, follow_up)
 
 
@@ -219,9 +236,7 @@ def generate_assistant_reply(
     )
 
     try:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
+        client = _qwen_client(provider)
         response = client.chat.completions.create(
             model=model or provider.model,
             messages=[
@@ -232,5 +247,6 @@ def generate_assistant_reply(
             max_tokens=260,
         )
         return response.choices[0].message.content.strip()
-    except Exception:
+    except Exception as exc:
+        print(f"Qwen assistant call failed through {provider.name}: {exc}")
         return fallback_assistant_reply(question, risk_score, risk_category, top_factors, follow_up)
