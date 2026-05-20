@@ -112,6 +112,7 @@ Or create `.streamlit/secrets.toml`:
 
 ```toml
 OPENROUTER_API_KEY = "your_openrouter_key_here"
+OPENROUTER_SITE_URL = "https://abgteam31.streamlit.app"
 ```
 
 For DashScope instead, use `DASHSCOPE_API_KEY`. The app shows a connection message inside the AI Assistant panel so you can confirm whether live Qwen or the fallback responder is being used.
