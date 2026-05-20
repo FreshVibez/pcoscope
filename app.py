@@ -1443,12 +1443,19 @@ def complete_pending_assistant_reply() -> None:
 def assistant_status_markup() -> str:
     """Return assistant connection status markup."""
 
+    last_error = st.session_state.get("qwen_last_error")
     if qwen_is_configured():
         provider = qwen_provider_name() or "Qwen"
+        error_markup = (
+            f'<div class="pcos-small" style="margin-top:0.65rem;color:#9b315f;">Last live call failed: {html.escape(str(last_error))}</div>'
+            if last_error
+            else ""
+        )
         return (
             '<div class="assistant-status">'
             f'<strong>Live Qwen connected through {html.escape(provider)}.</strong><br>'
             'Responses are generated through the configured OpenAI-compatible API with non-diagnostic safety instructions.'
+            f'{error_markup}'
             '</div>'
         )
     return (

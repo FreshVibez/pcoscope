@@ -101,22 +101,49 @@ def qwen_provider_name() -> str:
     return provider.name if provider else ""
 
 
+def _record_qwen_error(message: str) -> None:
+    """Expose live API failures in Streamlit so fallback use is debuggable."""
+
+    try:
+        import streamlit as st
+
+        st.session_state["qwen_last_error"] = message
+    except Exception:
+        pass
+
+
+def clear_qwen_error() -> None:
+    """Clear the last visible Qwen API error after a successful response."""
+
+    try:
+        import streamlit as st
+
+        st.session_state.pop("qwen_last_error", None)
+    except Exception:
+        pass
+
+
 def _qwen_client(provider: QwenProvider):
     """Create an OpenAI-compatible client for the selected provider."""
 
     from openai import OpenAI
 
-    if provider.name == "OpenRouter":
-        return OpenAI(
-            api_key=provider.api_key,
-            base_url=provider.base_url,
-            default_headers={
-                "HTTP-Referer": get_openrouter_site_url(),
-                "X-Title": "PCOScope",
-            },
-        )
-
     return OpenAI(api_key=provider.api_key, base_url=provider.base_url)
+
+
+def _openrouter_request_options(provider: QwenProvider) -> dict:
+    """Return provider-specific request options for OpenRouter rankings/attribution."""
+
+    if provider.name != "OpenRouter":
+        return {}
+
+    return {
+        "extra_headers": {
+            "HTTP-Referer": get_openrouter_site_url(),
+            "X-OpenRouter-Title": "PCOScope",
+        },
+        "extra_body": {},
+    }
 
 
 def fallback_explanation(
@@ -168,10 +195,14 @@ def generate_qwen_explanation(
             ],
             temperature=0.2,
             max_tokens=220,
+            **_openrouter_request_options(provider),
         )
+        clear_qwen_error()
         return response.choices[0].message.content.strip()
     except Exception as exc:
-        print(f"Qwen explanation call failed through {provider.name}: {exc}")
+        message = f"Qwen explanation call failed through {provider.name}: {exc}"
+        print(message)
+        _record_qwen_error(message)
         return fallback_explanation(risk_score, risk_category, top_factors, follow_up)
 
 
@@ -252,8 +283,12 @@ def generate_assistant_reply(
             ],
             temperature=0.2,
             max_tokens=260,
+            **_openrouter_request_options(provider),
         )
+        clear_qwen_error()
         return response.choices[0].message.content.strip()
     except Exception as exc:
-        print(f"Qwen assistant call failed through {provider.name}: {exc}")
+        message = f"Qwen assistant call failed through {provider.name}: {exc}"
+        print(message)
+        _record_qwen_error(message)
         return fallback_assistant_reply(question, risk_score, risk_category, top_factors, follow_up)
