@@ -617,11 +617,11 @@ def apply_theme() -> None:
         .st-key-assistant_drawer {
             position: fixed;
             right: 1.25rem;
-            top: 5.25rem;
+            bottom: 6.35rem;
             width: 430px;
             max-width: calc(100vw - 2.5rem);
-            height: min(680px, calc(100vh - 6.7rem));
-            overflow-y: auto;
+            height: min(640px, calc(100vh - 7.6rem));
+            overflow: hidden;
             z-index: 9998;
             background: #ffffff;
             border: 1px solid var(--pcos-border);
@@ -637,18 +637,18 @@ def apply_theme() -> None:
         .assistant-window {
             display: flex;
             flex-direction: column;
-            min-height: 100%;
+            height: min(640px, calc(100vh - 7.6rem));
+            min-height: 0;
         }
 
         .assistant-header {
-            position: sticky;
-            top: 0;
+            position: relative;
             z-index: 3;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 0.75rem;
-            padding: 1.05rem 1.3rem 1.05rem 4rem;
+            padding: 1.05rem 3.75rem 1.05rem 1.25rem;
             background: rgba(255, 255, 255, 0.96);
             border-bottom: 1px solid var(--pcos-border);
             border-radius: 22px 22px 0 0;
@@ -667,12 +667,36 @@ def apply_theme() -> None:
             margin-top: 0.1rem;
         }
 
+        .assistant-online {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--pcos-muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-top: 0.18rem;
+        }
+
+        .assistant-online:before {
+            content: "";
+            width: 0.48rem;
+            height: 0.48rem;
+            border-radius: 999px;
+            background: var(--pcos-accent);
+            box-shadow: 0 0 0 4px rgba(243, 180, 207, 0.25);
+        }
+
         .assistant-body {
             padding: 1.25rem 1.35rem 1.35rem;
         }
 
         .st-key-assistant_drawer .assistant-body {
-            padding: 1.15rem 1.35rem 1.35rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            flex: 1;
+            padding: 1.15rem 1.35rem 0;
+            overflow: hidden;
         }
 
         .assistant-status {
@@ -689,7 +713,14 @@ def apply_theme() -> None:
             color: var(--pcos-muted);
             font-size: 0.86rem;
             font-weight: 700;
-            margin: 0.85rem 0 0.55rem 0;
+            margin: 0.7rem 0 0.55rem 0;
+        }
+
+        .assistant-prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.55rem;
+            margin-bottom: 0.85rem;
         }
 
         .assistant-messages {
@@ -697,6 +728,9 @@ def apply_theme() -> None:
             margin-top: 1rem;
             padding-top: 1rem;
             padding-bottom: 0.85rem;
+            overflow-y: auto;
+            min-height: 190px;
+            flex: 1;
         }
 
         .assistant-message {
@@ -704,6 +738,10 @@ def apply_theme() -> None:
             gap: 0.8rem;
             align-items: flex-start;
             margin: 0.9rem 0;
+        }
+
+        .assistant-message.user {
+            flex-direction: row-reverse;
         }
 
         .assistant-avatar {
@@ -726,16 +764,42 @@ def apply_theme() -> None:
             color: var(--pcos-ink);
             background: #ffffff;
             line-height: 1.45;
-            width: 100%;
+            max-width: 82%;
+            width: fit-content;
         }
 
         .assistant-message.user .assistant-bubble {
             background: var(--pcos-soft-2);
             border-color: var(--pcos-border-strong);
+            text-align: left;
         }
 
         .assistant-message.user .assistant-avatar {
             background: var(--pcos-accent);
+        }
+
+        .assistant-typing {
+            display: inline-flex;
+            gap: 0.2rem;
+            align-items: center;
+            min-width: 2.8rem;
+        }
+
+        .assistant-typing span {
+            width: 0.36rem;
+            height: 0.36rem;
+            border-radius: 999px;
+            background: var(--pcos-accent);
+            opacity: 0.35;
+            animation: assistant-dot 1.15s infinite ease-in-out;
+        }
+
+        .assistant-typing span:nth-child(2) { animation-delay: 0.18s; }
+        .assistant-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+        @keyframes assistant-dot {
+            0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-0.16rem); }
         }
 
         .st-key-assistant_drawer .stButton > button {
@@ -746,9 +810,9 @@ def apply_theme() -> None:
         }
 
         .st-key-assistant_drawer .st-key-assistant_close_wrap {
-            position: fixed;
-            top: 6.05rem;
-            right: calc(1.25rem + 430px - 3.15rem);
+            position: absolute;
+            top: 0.9rem;
+            right: 1rem;
             z-index: 10001;
             width: 2.25rem;
             height: 0;
@@ -771,8 +835,8 @@ def apply_theme() -> None:
             z-index: 6;
             background: linear-gradient(180deg, rgba(255,255,255,0.88), #ffffff 18%);
             border-top: 1px solid var(--pcos-border);
-            padding: 1rem 0.2rem 0.65rem;
-            margin-top: 0.9rem;
+            padding: 0.95rem 0.2rem 0.8rem;
+            margin: 0;
             border-radius: 0 0 22px 22px;
         }
 
@@ -803,15 +867,18 @@ def apply_theme() -> None:
 
             .st-key-assistant_drawer {
                 right: 0.75rem;
-                top: 4.25rem;
+                bottom: 5.75rem;
                 width: calc(100vw - 1.5rem);
-                height: calc(100vh - 5.5rem);
+                height: calc(100vh - 6.8rem);
+            }
+
+            .assistant-window {
+                height: calc(100vh - 6.8rem);
             }
 
             .st-key-assistant_drawer .st-key-assistant_close_wrap {
-                top: 5.05rem;
-                left: 1.65rem;
-                right: auto;
+                top: 0.9rem;
+                right: 1rem;
             }
         }
         </style>
@@ -1343,14 +1410,34 @@ def ensure_assistant_messages() -> None:
                 "content": "I can explain PCOScope screening results, contributing factors, and clinician follow-up questions in non-diagnostic language.",
             }
         ]
+    st.session_state.setdefault("assistant_thinking", False)
+    st.session_state.setdefault("assistant_current_input", "")
+    st.session_state.setdefault("assistant_pending_question", None)
 
 
-def submit_assistant_question(question: str) -> None:
-    """Append a user question and assistant reply."""
+def queue_assistant_question(question: str) -> None:
+    """Queue a user question so the UI can show a typing bubble first."""
+
+    st.session_state["assistant_messages"].append({"role": "user", "content": question})
+    st.session_state["assistant_pending_question"] = question
+    st.session_state["assistant_thinking"] = True
+
+
+def complete_pending_assistant_reply() -> None:
+    """Generate the queued assistant reply through Qwen or the safe fallback."""
+
+    question = st.session_state.get("assistant_pending_question")
+    if not question:
+        return
 
     risk_score, risk_cat, factors, follow_up = current_assistant_context()
-    st.session_state["assistant_messages"].append({"role": "user", "content": question})
+
+    # Qwen/OpenRouter is connected inside generate_assistant_reply(). If no key
+    # is configured, that helper safely returns a local fallback response.
     reply = generate_assistant_reply(question, risk_score, risk_cat, factors, follow_up)
+
+    st.session_state["assistant_thinking"] = False
+    st.session_state["assistant_pending_question"] = None
     st.session_state["assistant_messages"].append({"role": "assistant", "content": reply})
 
 
@@ -1387,6 +1474,15 @@ def assistant_messages_markup() -> str:
             f'<div class="assistant-bubble">{html.escape(message["content"])}</div>'
             '</div>'
         )
+    if st.session_state.get("assistant_thinking"):
+        rows.append(
+            '<div class="assistant-message assistant">'
+            '<div class="assistant-avatar">AI</div>'
+            '<div class="assistant-bubble"><div class="assistant-typing">'
+            '<span></span><span></span><span></span>'
+            '</div></div>'
+            '</div>'
+        )
     return '<div class="assistant-messages">' + "".join(rows) + "</div>"
 
 
@@ -1404,7 +1500,7 @@ def render_assistant_chat(form_key: str) -> None:
     quick_cols = st.columns(2)
     for index, question in enumerate(QUICK_QUESTIONS):
         if quick_cols[index % 2].button(question, key=f"{form_key}_quick_{index}", width="stretch"):
-            submit_assistant_question(question)
+            queue_assistant_question(question)
             st.rerun()
 
     st.markdown(assistant_messages_markup(), unsafe_allow_html=True)
@@ -1414,7 +1510,11 @@ def render_assistant_chat(form_key: str) -> None:
         submitted = st.form_submit_button("Send", width="stretch")
 
     if submitted and user_question.strip():
-        submit_assistant_question(user_question.strip())
+        queue_assistant_question(user_question.strip())
+        st.rerun()
+
+    if st.session_state.get("assistant_pending_question"):
+        complete_pending_assistant_reply()
         st.rerun()
 
 
@@ -1451,8 +1551,8 @@ def render_assistant_page() -> None:
         st.markdown(
             '<div class="pcos-panel">'
             '<div class="assistant-header" style="position:static;margin:-1.35rem -1.35rem 1rem -1.35rem;border-radius:18px 18px 0 0;">'
-            '<div><div class="assistant-title">PCOScope Assistant</div>'
-            '<div class="assistant-subtitle">Screening explanation support</div></div>'
+            '<div><div class="assistant-title">AI Health Assistant</div>'
+            '<div class="assistant-online">Online</div></div>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -1478,8 +1578,8 @@ def render_assistant_launcher() -> None:
                 <div class="assistant-window">
                     <div class="assistant-header">
                         <div>
-                            <div class="assistant-title">PCOScope Assistant</div>
-                            <div class="assistant-subtitle">Screening explanation support</div>
+                            <div class="assistant-title">AI Health Assistant</div>
+                            <div class="assistant-online">Online</div>
                         </div>
                     </div>
                     <div class="assistant-body">
