@@ -621,7 +621,7 @@ def apply_theme() -> None:
             width: 430px;
             max-width: calc(100vw - 2.5rem);
             height: min(640px, calc(100vh - 7.6rem));
-            overflow: hidden;
+            overflow-y: auto;
             z-index: 9998;
             background: #ffffff;
             border: 1px solid var(--pcos-border);
@@ -637,7 +637,6 @@ def apply_theme() -> None:
         .assistant-window {
             display: flex;
             flex-direction: column;
-            height: min(640px, calc(100vh - 7.6rem));
             min-height: 0;
         }
 
@@ -873,7 +872,7 @@ def apply_theme() -> None:
             }
 
             .assistant-window {
-                height: calc(100vh - 6.8rem);
+                min-height: 0;
             }
 
             .st-key-assistant_drawer .st-key-assistant_close_wrap {
@@ -1575,19 +1574,16 @@ def render_assistant_launcher() -> None:
                     st.rerun()
             st.markdown(
                 """
-                <div class="assistant-window">
-                    <div class="assistant-header">
-                        <div>
-                            <div class="assistant-title">AI Health Assistant</div>
-                            <div class="assistant-online">Online</div>
-                        </div>
+                <div class="assistant-header">
+                    <div>
+                        <div class="assistant-title">AI Health Assistant</div>
+                        <div class="assistant-online">Online</div>
                     </div>
-                    <div class="assistant-body">
+                </div>
                 """,
                 unsafe_allow_html=True,
             )
             render_assistant_chat("assistant_drawer_form")
-            st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 def render_clinical_tab() -> None:
